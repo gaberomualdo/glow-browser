@@ -1,2 +1,2 @@
-# glow
-The web browser of the future.
+# Glow
+The browser of the future.

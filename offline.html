@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Glow: The Browser of the Future</title>
+	<link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
+
+	<style>
+	* {
+		padding: 0px;
+		margin: 0px;
+		font-family: "Roboto","Ubuntu",sans-serif;
+		color: #444;
+	}
+	body {
+		text-align: center;
+		overflow: hidden;
+	}
+	div.container {
+		width: 480px;
+		text-align: left;
+		padding: 1.5rem 0;
+		display: inline-block;
+	}
+	div.container h1 {
+		font-size: 2.5rem;
+		line-height: 1.5;
+	}
+	div.container p {
+		font-size: 1.25rem;
+		line-height: 1.5;
+		margin-bottom: 1rem;
+		color: #888;
+	}
+	div.container div p {
+		color: #555;
+		float: right;
+		margin-top: 1rem;
+		font-weight: 500;
+	}
+	div.container div p.high {
+		float: left;
+	}
+	#game {
+		--width: 480px;
+		--grid-spot-size: calc(480px / 20);
+		background-color: #efefef;
+		width: var(--width);
+		height: var(--width);
+		position: relative;
+	}
+	#game div {
+		width: var(--grid-spot-size);
+		height: var(--grid-spot-size);
+		position: absolute;
+		box-sizing: border-box;
+		border: 1px solid #efefef;
+		background-color: #555;
+	}
+	#game div.apple {
+		background-color: #aaa;
+	}
+	</style>
+</head>
+<body>
+	<script>
+	console.clear();
+	function getQueryVariable(variable){
+		var query = window.location.search.substring(1);
+		var vars = query.split("&");
+		for (var i=0;i<vars.length;i++) {
+			var pair = vars[i].split("=");
+			if(pair[0] == variable){
+				return pair[1];
+			}
+		}
+		return(false);
+	}
+	if(!getQueryVariable("web")){
+		function checkOnline(){
+			if(navigator.onLine){
+				if(process.mainModule.filename.indexOf('.app') === -1){
+					window.location.href = "index.html";
+				}else{
+					window.location.href = "https://xtrp.github.io/grace/index.html";
+				}
+			}
+		}
+		checkOnline();
+		setInterval(checkOnline, 500);
+	}
+	</script>
+	<div class="container">
+		<h1>No Internet Connection</h1>
+		<p>Please re-connect to use Glow.</p>
+		<div id="game"></div>
+		<div>
+			<p class="high"></p>
+			<p class="score"></p>
+		</div>
+	</div>
+
+	<script>
+	size=25;
+	px=py=9;
+	ax=ay=0;
+	xv=yv=0;
+
+	trail=[{x:9,y:9}];
+	gameover = false;
+	first = true;
+
+	document.onkeydown = function(e){
+		if(e.keyCode==37 && xv != 1){
+			xv=-1;yv=0;
+		}else if(e.keyCode==39 && xv != -1){
+			xv=1;yv=0;
+		}else if(e.keyCode==38 && yv != 1){
+			yv=-1;xv=0;
+		}else if(e.keyCode==40 && yv != -1){
+			yv=1;xv=0;
+		}
+		if(yv + xv != 0){
+			first = false;
+		}
+	}
+	setInterval(function(){
+		px+=xv;
+		py+=yv;
+		if(px == 20){
+			px = 0;
+		}
+		if(px == -1){
+			px = 19;
+		}
+		if(py == 20){
+			py = 0;
+		}
+		if(py == -1){
+			py = 19;
+		}
+		document.getElementById("game").innerHTML = "<div class='apple' style='left: calc(" + (ax) + " * var(--grid-spot-size));top: calc(" + (ay) + " * var(--grid-spot-size))'></div>";
+		if(gameover){
+			px=py=9;
+			xv=yv=0;
+
+			trail=[{x:9,y:9}];
+			gameover = false;
+			first =true;
+		}
+		trail.forEach(function(item,index){
+			if(item.x == px && item.y == py && !first){
+				gameover=true;
+			}
+			document.getElementById("game").innerHTML += "<div style='left: calc(" + (item.x) + " * var(--grid-spot-size));top: calc(" + (item.y) + " * var(--grid-spot-size))'></div>";
+		});
+		trail.push({x:px,y:py});
+		if(ax==px && ay==py){
+			ready = false;
+			while(!ready){
+				ax = Math.floor(Math.random() * 20);
+				ay = Math.floor(Math.random() * 20);
+				ready = true;
+				trail.forEach(function(item,index){
+					if(item.x == ax && item.y == ay){
+						ready = false;
+					}
+				})
+			}
+		}else{
+			trail.shift();
+		}
+		if((trail.length - 1) > (localStorage.getItem("grace-snake-game-high-score") || 0)){
+			localStorage.setItem("grace-snake-game-high-score",(trail.length - 1));
+		}
+		if(!first){
+			document.querySelector(".score").innerHTML = "Score: " + (trail.length - 1);
+			if(localStorage.getItem("grace-snake-game-high-score") != null){
+				console.log(localStorage.getItem("grace-snake-game-high-score"));
+				document.querySelector(".high").innerHTML = "High Score: " + localStorage.getItem("grace-snake-game-high-score");
+			}else{
+				document.querySelector(".high").innerHTML = "High Score: 0";
+			}
+		}
+
+	},100);
+	</script>
+</body>
+</html>
