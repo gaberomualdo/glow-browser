@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron ."
   },
-  "author": "Fred Adams",
+  "author": "Gabriel Romualdo",
   "license": "MIT License",
   "pack:osx": "electron-packager glow Glow --out=glow/dist/ --platform=darwin --arch=x64 --icon=glow/assets/img/icon.icns",
   "build": "npm run pack:osx",
